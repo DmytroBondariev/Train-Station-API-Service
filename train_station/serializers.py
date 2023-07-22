@@ -13,7 +13,7 @@ class TrainTypeSerializer(serializers.ModelSerializer):
 class TrainSerializer(serializers.ModelSerializer):
     class Meta:
         model = Train
-        fields = ("id", "name", "type", "wagon_count", "wagon_capacity", "capacity")
+        fields = ("id", "name", "type", "wagon_count", "wagon_capacity", "capacity", "image")
 
 
 class StationSerializer(serializers.ModelSerializer):
