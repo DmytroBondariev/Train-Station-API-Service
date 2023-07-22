@@ -1,4 +1,6 @@
+from django.contrib.auth import get_user_model
 from django.db import models
+from rest_framework.exceptions import ValidationError
 
 
 class TrainType(models.Model):
@@ -89,3 +91,59 @@ class Journey(models.Model):
         return f"{self.train.name} {self.route.source.name} - " \
                f"{self.route.destination.name} {self.departure_time} - " \
                f"{self.arrival_time}"
+
+
+class Order(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+
+    def str(self):
+        return f"{self.created_at}"
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+class Ticket(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
+    journey = models.ForeignKey(Journey, on_delete=models.CASCADE, related_name="tickets")
+    wagon_number = models.IntegerField()
+    seat_number = models.IntegerField()
+    price = models.IntegerField()
+
+    @staticmethod
+    def validate_ticket(wagon_number, seat_number, journey, error_to_raise):
+        if wagon_number < 1 or wagon_number > journey.train.wagon_count:
+            raise error_to_raise(
+                {
+                    "wagon_number": f"Wagon number must be in available range: "
+                    f"(1, {journey.train.wagon_count})"
+                }
+            )
+        if seat_number < 1 or seat_number > journey.train.wagon_capacity:
+            raise error_to_raise(
+                {
+                    "seat_number": f"Seat number must be in available range: "
+                    f"(1, {journey.train.wagon_capacity})"
+                }
+            )
+
+    def clean(self):
+        self.validate_ticket(
+            self.wagon_number, self.seat_number, self.journey, ValidationError
+        )
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        self.validate_ticket(
+            self.wagon_number, self.seat_number, self.journey, ValueError
+        )
+        super().save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        return f"{self.journey} {self.wagon_number} {self.seat_number}"
+
+    class Meta:
+        unique_together = ("journey", "wagon_number", "seat_number")
+        ordering = ["journey", "wagon_number", "seat_number"]
