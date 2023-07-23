@@ -8,7 +8,7 @@ from rest_framework.viewsets import GenericViewSet
 from train_station.models import Station, Train, Journey, Order
 from train_station.permissions import IsAdminOrIfAuthenticatedReadOnly
 from train_station.serializers import StationSerializer, TrainSerializer, JourneySerializer, JourneyListSerializer, \
-    JourneyDetailSerializer, OrderSerializer, OrderListSerializer
+    JourneyDetailSerializer, OrderSerializer, OrderListSerializer, TrainCreateSerializer
 
 
 class StationViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
@@ -21,6 +21,11 @@ class TrainViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSe
     queryset = Train.objects.all()
     serializer_class = TrainSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return TrainCreateSerializer
+        return TrainSerializer
 
 
 class JourneyViewSet(viewsets.ModelViewSet):

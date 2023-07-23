@@ -16,6 +16,10 @@ class TrainSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "type", "wagon_count", "wagon_capacity", "capacity", "image")
 
 
+class TrainCreateSerializer(TrainSerializer):
+    type = serializers.PrimaryKeyRelatedField(queryset=TrainType.objects.all())
+
+
 class StationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Station
