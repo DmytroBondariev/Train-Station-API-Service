@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "user",
+    "train_station",
 ]
 
 MIDDLEWARE = [
