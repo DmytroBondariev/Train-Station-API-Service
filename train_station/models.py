@@ -87,6 +87,9 @@ class Route(models.Model):
                     ) ** 2) ** 0.5
         )
 
+    def __str__(self):
+        return f"{self.source.name} - {self.destination.name}"
+
 
 class Journey(models.Model):
     train = models.ForeignKey(

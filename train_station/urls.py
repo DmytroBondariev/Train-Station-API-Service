@@ -5,11 +5,12 @@ from train_station.views import (
     StationViewSet,
     TrainViewSet,
     JourneyViewSet,
-    OrderViewSet
+    OrderViewSet, RouteViewSet
 )
 router = routers.DefaultRouter()
 router.register("stations", StationViewSet)
 router.register("trains", TrainViewSet)
+router.register("routes", RouteViewSet)
 router.register("journeys", JourneyViewSet)
 router.register("orders", OrderViewSet)
 

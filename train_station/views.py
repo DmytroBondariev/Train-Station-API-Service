@@ -5,10 +5,11 @@ from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
-from train_station.models import Station, Train, Journey, Order
+from train_station.models import Station, Train, Journey, Order, Route
 from train_station.permissions import IsAdminOrIfAuthenticatedReadOnly
 from train_station.serializers import StationSerializer, TrainSerializer, JourneySerializer, JourneyListSerializer, \
-    JourneyDetailSerializer, OrderSerializer, OrderListSerializer, TrainCreateSerializer
+    JourneyDetailSerializer, OrderSerializer, OrderListSerializer, TrainCreateSerializer, RouteSerializer, \
+    RouteCreateSerializer
 
 
 class StationViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
@@ -26,6 +27,17 @@ class TrainViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSe
         if self.action == "create":
             return TrainCreateSerializer
         return TrainSerializer
+
+
+class RouteViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
+    queryset = Route.objects.all()
+    serializer_class = RouteSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return RouteCreateSerializer
+        return RouteSerializer
 
 
 class JourneyViewSet(viewsets.ModelViewSet):
@@ -48,7 +60,7 @@ class JourneyViewSet(viewsets.ModelViewSet):
         if source and destination:
             queryset = queryset.filter(route_source__in=source, route_destination__in=destination)
 
-            return queryset.distinct()
+        return queryset.distinct()
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -63,7 +75,7 @@ class OrderViewSet(
     mixins.CreateModelMixin,
     GenericViewSet,
 ):
-    queryset = Order.objects.prefetch_related("tickets__journey__train", "tickets__journey__route",)
+    queryset = Order.objects.prefetch_related("tickets__journey__train", "tickets__journey__route", )
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
 

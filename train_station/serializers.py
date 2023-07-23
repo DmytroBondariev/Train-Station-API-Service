@@ -11,6 +11,8 @@ class TrainTypeSerializer(serializers.ModelSerializer):
 
 
 class TrainSerializer(serializers.ModelSerializer):
+    type = serializers.SlugRelatedField(slug_field="name", read_only=True)
+
     class Meta:
         model = Train
         fields = ("id", "name", "type", "wagon_count", "wagon_capacity", "capacity", "image")
@@ -27,9 +29,17 @@ class StationSerializer(serializers.ModelSerializer):
 
 
 class RouteSerializer(serializers.ModelSerializer):
+    source = serializers.CharField(source="source.name", read_only=True)
+    destination = serializers.CharField(source="destination.name", read_only=True)
+
     class Meta:
         model = Route
         fields = ("id", "source", "destination", "distance")
+
+
+class RouteCreateSerializer(RouteSerializer):
+    source = serializers.PrimaryKeyRelatedField(queryset=Station.objects.all())
+    destination = serializers.PrimaryKeyRelatedField(queryset=Station.objects.all())
 
 
 class JourneySerializer(serializers.ModelSerializer):
