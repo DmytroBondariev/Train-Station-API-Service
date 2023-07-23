@@ -110,6 +110,9 @@ class Journey(models.Model):
                f"{self.route.destination.name} {self.departure_time} - " \
                f"{self.arrival_time}"
 
+    class Meta:
+        ordering = ["departure_time"]
+
 
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)

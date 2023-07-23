@@ -34,6 +34,48 @@ class JourneySerializer(serializers.ModelSerializer):
         fields = ("id", "train", "route", "departure_time", "arrival_time", "duration")
 
 
+class JourneyListSerializer(JourneySerializer):
+    train = serializers.CharField(source="train.type.name", read_only=True)
+    source = serializers.CharField(source="route.source.name", read_only=True)
+    destination = serializers.CharField(source="route.destination.name", read_only=True)
+    tickets_available = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Journey
+        fields = (
+            "id",
+            "train",
+            "source",
+            "destination",
+            "departure_time",
+            "arrival_time",
+            "tickets_available",
+        )
+
+
+class JourneyDetailSerializer(JourneySerializer):
+    train_image = serializers.ImageField(source="train.image", read_only=True)
+    distance = serializers.IntegerField(source="route.distance", read_only=True)
+    tickets_available = serializers.IntegerField(read_only=True)
+    source = serializers.CharField(source="route.source.name", read_only=True)
+    destination = serializers.CharField(source="route.destination.name", read_only=True)
+
+    class Meta:
+        model = Journey
+        fields = (
+            "id",
+            "train",
+            "train_image",
+            "source",
+            "destination",
+            "departure_time",
+            "arrival_time",
+            "duration",
+            "distance",
+            "tickets_available",
+        )
+
+
 class TicketSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -43,6 +85,7 @@ class TicketSerializer(serializers.ModelSerializer):
             attrs["journey"].train,
             serializers.ValidationError,
         )
+        return data
 
     class Meta:
         model = Ticket
