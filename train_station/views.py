@@ -2,12 +2,13 @@ from datetime import datetime
 
 from django.db.models import Count, F
 from rest_framework import viewsets, mixins
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
-from train_station.models import Station, Train, Journey
+from train_station.models import Station, Train, Journey, Order
 from train_station.permissions import IsAdminOrIfAuthenticatedReadOnly
 from train_station.serializers import StationSerializer, TrainSerializer, JourneySerializer, JourneyListSerializer, \
-    JourneyDetailSerializer
+    JourneyDetailSerializer, OrderSerializer, OrderListSerializer
 
 
 class StationViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
@@ -50,3 +51,21 @@ class JourneyViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return JourneyDetailSerializer
         return JourneySerializer
+
+
+class OrderViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericViewSet,
+):
+    queryset = Order.objects.prefetch_related("tickets__journey__train", "tickets__journey__route",)
+    serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return OrderListSerializer
+        return OrderSerializer

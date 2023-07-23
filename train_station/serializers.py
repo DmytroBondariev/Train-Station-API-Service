@@ -53,10 +53,36 @@ class JourneyListSerializer(JourneySerializer):
         )
 
 
+class TicketSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        Ticket.validate_ticket(
+            attrs["wagon_number"],
+            attrs["seat_number"],
+            attrs["journey"].train,
+            serializers.ValidationError,
+        )
+        return data
+
+    class Meta:
+        model = Ticket
+        fields = ("id", "journey", "seat")
+
+
+class TicketListSerializer(TicketSerializer):
+    movie_session = JourneyListSerializer(many=False, read_only=True)
+
+
+class TicketSeatSerializer(TicketSerializer):
+    class Meta:
+        model = Ticket
+        fields = ("wagon_number", "seat_number")
+
+
 class JourneyDetailSerializer(JourneySerializer):
     train_image = serializers.ImageField(source="train.image", read_only=True)
     distance = serializers.IntegerField(source="route.distance", read_only=True)
-    tickets_available = serializers.IntegerField(read_only=True)
+    taken_places = TicketSeatSerializer(many=True, read_only=True, source="tickets")
     source = serializers.CharField(source="route.source.name", read_only=True)
     destination = serializers.CharField(source="route.destination.name", read_only=True)
 
@@ -76,22 +102,6 @@ class JourneyDetailSerializer(JourneySerializer):
         )
 
 
-class TicketSerializer(serializers.ModelSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        Ticket.validate_ticket(
-            attrs["wagon_number"],
-            attrs["seat_number"],
-            attrs["journey"].train,
-            serializers.ValidationError,
-        )
-        return data
-
-    class Meta:
-        model = Ticket
-        fields = ("id", "journey", "seat")
-
-
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
@@ -104,3 +114,7 @@ class OrderSerializer(serializers.ModelSerializer):
             for ticket_data in tickets_data:
                 Ticket.objects.create(order=order, **ticket_data)
             return order
+
+
+class OrderListSerializer(OrderSerializer):
+    tickets = TicketListSerializer(many=True, read_only=True)
