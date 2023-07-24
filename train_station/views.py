@@ -7,9 +7,18 @@ from rest_framework.viewsets import GenericViewSet
 
 from train_station.models import Station, Train, Journey, Order, Route
 from train_station.permissions import IsAdminOrIfAuthenticatedReadOnly
-from train_station.serializers import StationSerializer, TrainSerializer, JourneySerializer, JourneyListSerializer, \
-    JourneyDetailSerializer, OrderSerializer, OrderListSerializer, TrainCreateSerializer, RouteSerializer, \
+from train_station.serializers import (
+    StationSerializer,
+    TrainSerializer,
+    JourneySerializer,
+    JourneyListSerializer,
+    JourneyDetailSerializer,
+    OrderSerializer,
+    OrderListSerializer,
+    TrainCreateSerializer,
+    RouteSerializer,
     RouteCreateSerializer
+)
 
 
 class StationViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
@@ -44,7 +53,10 @@ class JourneyViewSet(viewsets.ModelViewSet):
     queryset = Journey.objects.all().prefetch_related(
         "train", "route"
     ).annotate(
-        tickets_available=(F("train__wagon_count") * F("train__wagon_capacity")) - Count("tickets"))
+        tickets_available=(
+            F("train__wagon_count") * F("train__wagon_capacity")
+        ) - Count("tickets")
+    )
     serializer_class = JourneySerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
@@ -58,7 +70,10 @@ class JourneyViewSet(viewsets.ModelViewSet):
             date = datetime.strptime(date, "%Y-%m-%d").date()
             queryset = queryset.filter(departure_time__date=date)
         if source and destination:
-            queryset = queryset.filter(route_source__in=source, route_destination__in=destination)
+            queryset = queryset.filter(
+                route_source__in=source,
+                route_destination__in=destination
+            )
 
         return queryset.distinct()
 
@@ -75,7 +90,10 @@ class OrderViewSet(
     mixins.CreateModelMixin,
     GenericViewSet,
 ):
-    queryset = Order.objects.prefetch_related("tickets__journey__train", "tickets__journey__route", )
+    queryset = Order.objects.prefetch_related(
+        "tickets__journey__train",
+        "tickets__journey__route",
+    )
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
 

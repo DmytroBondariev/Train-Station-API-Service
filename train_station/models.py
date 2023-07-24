@@ -80,12 +80,8 @@ class Route(models.Model):
     @property
     def distance(self):
         return int(
-            (
-                    (self.source.latitude - self.destination.latitude) ** 2 +
-                    (
-                            self.source.longitude - self.destination.longitude
-                    ) ** 2) ** 0.5
-        )
+            ((self.source.latitude - self.destination.latitude) ** 2
+             + (self.source.longitude - self.destination.longitude) ** 2) ** 0.5)
 
     def __str__(self):
         return f"{self.source.name} - {self.destination.name}"
@@ -104,11 +100,10 @@ class Journey(models.Model):
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
 
-
     def __str__(self):
-        return f"{self.train.name} {self.route.source.name} - " \
-               f"{self.route.destination.name} {self.departure_time} - " \
-               f"{self.arrival_time}"
+        return (f"{self.train.name} {self.route.source.name} - "
+                f"{self.route.destination.name} {self.departure_time} - "
+                f"{self.arrival_time}")
 
     class Meta:
         ordering = ["departure_time"]
@@ -127,7 +122,11 @@ class Order(models.Model):
 
 class Ticket(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
-    journey = models.ForeignKey(Journey, on_delete=models.CASCADE, related_name="tickets")
+    journey = models.ForeignKey(
+        Journey,
+        on_delete=models.CASCADE,
+        related_name="tickets"
+    )
     wagon_number = models.IntegerField()
     seat_number = models.IntegerField()
 
