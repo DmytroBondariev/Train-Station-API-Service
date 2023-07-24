@@ -133,7 +133,6 @@ class Ticket(models.Model):
     journey = models.ForeignKey(Journey, on_delete=models.CASCADE, related_name="tickets")
     wagon_number = models.IntegerField()
     seat_number = models.IntegerField()
-    price = models.IntegerField()
 
     @staticmethod
     def validate_ticket(wagon_number, seat_number, journey, error_to_raise):
