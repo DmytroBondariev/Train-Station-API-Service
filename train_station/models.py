@@ -104,9 +104,6 @@ class Journey(models.Model):
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
 
-    @property
-    def duration(self):
-        return self.arrival_time - self.departure_time
 
     def __str__(self):
         return f"{self.train.name} {self.route.source.name} - " \

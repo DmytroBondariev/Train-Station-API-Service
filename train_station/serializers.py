@@ -45,7 +45,7 @@ class RouteCreateSerializer(RouteSerializer):
 class JourneySerializer(serializers.ModelSerializer):
     class Meta:
         model = Journey
-        fields = ("id", "train", "route", "departure_time", "arrival_time", "duration")
+        fields = ("id", "train", "route", "departure_time", "arrival_time")
 
 
 class JourneyListSerializer(JourneySerializer):
@@ -110,9 +110,8 @@ class JourneyDetailSerializer(JourneySerializer):
             "destination",
             "departure_time",
             "arrival_time",
-            "duration",
             "distance",
-            "tickets_available",
+            "taken_places",
         )
 
 
